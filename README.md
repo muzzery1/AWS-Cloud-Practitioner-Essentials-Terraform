@@ -31,6 +31,14 @@ Provider configuration belongs to each demo root. AWS credentials do not: supply
 
 The Terraform Cloud organization and workspace are configured in each demo's `versions.tf`. Update those values to match your Terraform Cloud account before initializing the demo.
 
+## VS Code tasks
+
+Open the repository folder in VS Code, then choose **Terminal > Run Task** and select a task:
+
+- **Terraform: Format All** runs `terraform fmt -recursive` from the repository root. It formats Terraform files in place; review the resulting changes before committing.
+- **Terraform: Validate All** initializes and validates each immediate Terraform configuration directory under `demos/`, `modules/`, and `templates/`. Initialization uses `-backend=false`, so it does not connect to Terraform Cloud or access remote state. Terraform and provider plugins must be installed locally; the first initialization may download providers. The task uses PowerShell and stops if initialization or validation fails.
+- **Terraform: Init and Plan demo 01** initializes `demos/01-compute-in-the-cloud/` with its configured HCP Terraform backend, then runs `terraform plan`. It does not apply changes. Run `terraform login` first and ensure the HCP Terraform workspace and AWS provider credentials are configured. Review the plan before applying or deploying resources.
+
 ## Running a demo
 
 For example, from `demos/01-compute-in-the-cloud/`:
@@ -57,4 +65,4 @@ Replace `REPLACE_WITH_DEMO_NAME`, `REPLACE_WITH_TERRAFORM_CLOUD_ORGANIZATION`, a
 
 ## Compatibility and quality checks
 
-Each root module declares the Terraform and provider versions it uses and should commit its own `.terraform.lock.hcl`. Run `terraform fmt -recursive -check` from the repository root, and run `terraform validate` from each demo directory when making changes.
+Each root module declares the Terraform and provider versions it uses and should commit its own `.terraform.lock.hcl`. Run `terraform fmt -recursive -check` from the repository root, and run `terraform validate` from each demo directory when making changes. The HCP plan check verifies the demo against the configured remote workspace and provider credentials without applying changes.

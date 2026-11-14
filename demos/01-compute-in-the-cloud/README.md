@@ -35,3 +35,7 @@ terraform destroy
 AWS credentials must be configured outside this repository, preferably with Terraform Cloud dynamic credentials. Do not put access keys in Terraform files or commit them to Git.
 
 For VCS-driven Terraform Cloud runs, set this workspace's working directory to `demos/01-compute-in-the-cloud` so the run uses this root module.
+
+## VS Code tasks
+
+In VS Code, run **Terminal > Run Task > Terraform: Init and Plan demo 01** to initialize this root with its configured HCP Terraform backend and create a plan without applying it. Authenticate the Terraform CLI with `terraform login` and configure AWS provider credentials in the HCP Terraform workspace before running the task. Review the plan and potential costs before applying changes.
