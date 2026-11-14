@@ -12,7 +12,7 @@ terraform {
     organization = "muzzery1-org"
 
     workspaces {
-      name = "aws-practitioner-demo-01"
+      name = local.demo_name
     }
   }
 }
