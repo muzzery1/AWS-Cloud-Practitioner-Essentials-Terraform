@@ -2,12 +2,40 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "Terraform: Format",
+      "label": "Terraform: Format All",
       "type": "process",
       "command": "terraform",
       "args": [
         "fmt",
         "-recursive"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Terraform: Validate All",
+      "type": "process",
+      "command": "powershell",
+      "args": [
+        "-NoProfile",
+        "-Command",
+        "$directories = @('demos', 'modules', 'templates') | ForEach-Object { Get-ChildItem -Path $_ -Directory }; foreach ($directory in $directories) { $directory.Name; terraform \"-chdir=$($directory.FullName)\" init -backend=false -input=false; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; terraform \"-chdir=$($directory.FullName)\" validate; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE } }"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Terraform: Init and Plan demo 01",
+      "type": "process",
+      "command": "powershell",
+      "args": [
+        "-NoProfile",
+        "-Command",
+        "terraform '-chdir=demos/01-compute-in-the-cloud' init -input=false; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; terraform '-chdir=demos/01-compute-in-the-cloud' plan -input=false; exit $LASTEXITCODE"
       ],
       "options": {
         "cwd": "${workspaceFolder}"
