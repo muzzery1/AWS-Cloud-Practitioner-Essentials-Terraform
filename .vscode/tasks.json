@@ -41,6 +41,20 @@
         "cwd": "${workspaceFolder}"
       },
       "problemMatcher": []
+    },
+    {
+      "label": "Terraform: Init and Plan demo 02",
+      "type": "process",
+      "command": "powershell",
+      "args": [
+        "-NoProfile",
+        "-Command",
+        "terraform '-chdir=demos/02-exploring-compute-services' init -input=false; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; terraform '-chdir=demos/02-exploring-compute-services' plan -input=false; exit $LASTEXITCODE"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
     }
   ]
 }
