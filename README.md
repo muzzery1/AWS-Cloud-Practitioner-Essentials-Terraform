@@ -6,22 +6,28 @@ This repository is a learning lab and portfolio built alongside the [AWS Cloud P
 
 ```text
 demos/
-  01-compute-in-the-cloud/   Independent Terraform root module for lesson 01
+  01-compute-in-the-cloud/         Independent Terraform root module for lesson 01
+  02-exploring-compute-services/   Independent Terraform root module for lesson 02
 modules/
-  ec2/                       Reusable EC2 instance child module
+  ec2/                             Reusable EC2 instance child module
+  lambda/                          Reusable SQS-triggered Lambda child module
+  sqs/                             Reusable SQS FIFO queue child module
 templates/
-  demo/                      Starter Terraform files for new demos
+  demo/                            Starter Terraform files for new demos
 ```
 
 ### Demos
 
-Each directory under `demos/` is an independent Terraform root module. Run Terraform commands from that directory. Each demo owns its Terraform Cloud workspace and state. For VCS-driven Terraform Cloud runs, set the workspace's working directory to the demo directory. See the [demo 01 guide](./demos/01-compute-in-the-cloud/README.md) for its architecture, access limitations, and cost notes.
+Each directory under `demos/` is an independent Terraform root module. Run Terraform commands from that directory. Each demo owns its Terraform Cloud workspace and state. For VCS-driven Terraform Cloud runs, set the workspace's working directory to the demo directory.
+
+- [Demo 01: Compute in the cloud](./demos/01-compute-in-the-cloud/README.md) deploys an EC2 instance into a private subnet.
+- [Demo 02: Exploring compute services](./demos/02-exploring-compute-services/README.md) deploys an SQS FIFO queue and a Lambda function that processes and logs manually sent messages.
 
 Using one workspace per demo isolates Terraform state, but it does not prevent AWS charges. Always review the plan and destroy temporary resources when finished.
 
 ### Modules
 
-Modules are child components called by root modules. The `modules/ec2/` module creates only an EC2 instance; callers provide its AMI, subnet, security groups, and common tags. The module merges the supplied tags with its resource-specific `Name` tag.
+Modules are child components called by root modules. The [EC2 module](./modules/ec2/README.md) creates an instance from caller-provided AMI, subnet, security groups, and common tags. The [SQS module](./modules/sqs/README.md) creates an encrypted FIFO queue. The [Lambda module](./modules/lambda/README.md) packages and deploys a Node.js function, grants it queue polling and CloudWatch Logs permissions, and connects it to an SQS queue. Each module applies its resource-specific `Name` tag alongside supplied common tags where applicable.
 
 Each demo configures its own AWS provider, versions, tags, and Terraform Cloud workspace because Terraform roots are independent. Use `templates/demo/` as a starting point for new demos; copy the files, replace the demo and Terraform Cloud placeholders, then remove any variables the demo does not use. Tags are passed explicitly to resources and child modules rather than applied implicitly by provider `default_tags`.
 
@@ -38,6 +44,7 @@ Open the repository folder in VS Code, then choose **Terminal > Run Task** and s
 - **Terraform: Format All** runs `terraform fmt -recursive` from the repository root. It formats Terraform files in place; review the resulting changes before committing.
 - **Terraform: Validate All** initializes and validates each immediate Terraform configuration directory under `demos/`, `modules/`, and `templates/`. Initialization uses `-backend=false`, so it does not connect to Terraform Cloud or access remote state. Terraform and provider plugins must be installed locally; the first initialization may download providers. The task uses PowerShell and stops if initialization or validation fails.
 - **Terraform: Init and Plan demo 01** initializes `demos/01-compute-in-the-cloud/` with its configured HCP Terraform backend, then runs `terraform plan`. It does not apply changes. Run `terraform login` first and ensure the HCP Terraform workspace and AWS provider credentials are configured. Review the plan before applying or deploying resources.
+- **Terraform: Init and Plan demo 02** initializes `demos/02-exploring-compute-services/` with its configured HCP Terraform backend, then runs `terraform plan`. It does not apply changes. Run `terraform login` first and ensure the HCP Terraform workspace and AWS provider credentials are configured. Review the plan before applying or deploying resources.
 
 ## Running a demo
 
@@ -52,13 +59,15 @@ terraform destroy
 
 `terraform plan` is a review step, not a guarantee of zero cost. Check the resources and current AWS pricing before applying. See [demo 01](./demos/01-compute-in-the-cloud/README.md) for details.
 
+Demo 02 deploys an SQS FIFO queue and Lambda consumer. From `demos/02-exploring-compute-services/`, use the same commands to initialize, plan, apply, and destroy. To test it, send a message to the FIFO queue in the AWS console with a message group ID, then inspect the Lambda's CloudWatch Logs. See the [demo 02 guide](./demos/02-exploring-compute-services/README.md) for permissions, deduplication behavior, and cleanup details.
+
 ## Starting a new demo
 
 For example, in PowerShell create a new demo folder and copy the starter files:
 
 ```powershell
-New-Item -ItemType Directory demos\02-your-demo
-Copy-Item templates\demo\*.tf demos\02-your-demo\
+New-Item -ItemType Directory demos\03-your-demo
+Copy-Item templates\demo\*.tf demos\03-your-demo\
 ```
 
 Replace `REPLACE_WITH_DEMO_NAME`, `REPLACE_WITH_TERRAFORM_CLOUD_ORGANIZATION`, and `REPLACE_WITH_TERRAFORM_CLOUD_WORKSPACE`. Add the lesson's resources in `main.tf`, pass `local.default_tags` to taggable resources and child modules, and remove unused template variables. Each demo needs its own Terraform Cloud workspace and lock file.
